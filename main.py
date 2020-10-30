@@ -1,6 +1,6 @@
 import json
 import requests
-from keys import spotifyToken, userId
+from keys import *
 
 
 class SpotifyMixer:
@@ -10,6 +10,21 @@ class SpotifyMixer:
         self.userId = userId
         self.playlists = []
         self.inputList = []
+
+    # Get access token
+    # def getAccessToken(self):
+    #     query = "https://accounts.spotify.com/authorize"
+    #     response = requests.get(
+    #         query,
+    #         params = {
+    #             "client_id":clientId,
+    #             "response_type":"code",
+    #             "redirect_uri":redirectURI
+    #         } 
+    #     )
+    #     print(response.json())
+
+    #     return response.json()
 
     # Retrieve list of user's playlists
     def getPlaylists(self):
@@ -37,19 +52,33 @@ class SpotifyMixer:
                     "id":playlist['id']
                 }
             )
-            
+
     # Prompt user to enter a list of playlists to mix together
     def getUserInput(self):
         print("Enter playlists to mix. To stop entering playlists, just press 'enter'.")
         # enter input until empty return and check if playlist is valid
+        error = False
+        duplicate = False
         while True:
-            playlist = input("Enter a playlist: ")
+            if not error and not duplicate:
+                playlist = input("Enter a playlist: ")
+            elif error:
+                playlist = input("You entered an invalid playlist, please enter another one: ")
+            else:
+                playlist = input("You have already entered this playlist, please enter another one: ")
             # check validity
-            validPlaylist = any(item['id'] == playlist for item in self.playlists)
-            if playlist and validPlaylist:
+            validPlaylist = any(item['name'] == playlist for item in self.playlists)
+            # check duplicate
+            duplicatePlaylist = playlist in self.inputList
+            if playlist and validPlaylist and not duplicatePlaylist:
                 self.inputList.append(playlist)
-            elif not validPlaylist:
-                
+                print('Playlist added!')
+                error = False
+                duplicate = False
+            elif playlist and not validPlaylist:
+                error = True
+            elif playlist and duplicatePlaylist:
+                duplicate = True
             else:
                 break
             
@@ -57,5 +86,5 @@ class SpotifyMixer:
 
 
 mixer = SpotifyMixer()
-# mixer.mapPlaylists()
+mixer.mapPlaylists()
 mixer.getUserInput()
