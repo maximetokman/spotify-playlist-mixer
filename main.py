@@ -6,25 +6,39 @@ from keys import *
 class SpotifyMixer:
 
     def __init__(self):
-        self.spotifyToken = spotifyToken
+        self.accessToken = None
         self.userId = userId
         self.playlists = []
         self.inputList = []
 
-    # Get access token
-    # def getAccessToken(self):
-    #     query = "https://accounts.spotify.com/authorize"
-    #     response = requests.get(
-    #         query,
-    #         params = {
-    #             "client_id":clientId,
-    #             "response_type":"code",
-    #             "redirect_uri":redirectURI
-    #         } 
-    #     )
-    #     print(response.json())
+    # Get updated access token
+    def getAccessToken(self):
+        # query = "https://accounts.spotify.com/api/token"
+        # response = requests.post(
+        #     query,
+        #     {
+        #         "grant_type":"authorization_code",
+        #         "code":authCode,
+        #         "redirect_uri":redirectURI,
+        #         "client_id":clientId,
+        #         "client_secret":clientSecret
+        #     }
+        # )
 
-    #     return response.json()
+        # print(response.json())
+        # self.refreshToken = response.json()['refresh_token']
+        query = "https://accounts.spotify.com/api/token"
+        response = requests.post(
+            query,
+            {
+                "grant_type":"refresh_token",
+                "refresh_token":refreshToken,
+                "client_id":clientId,
+                "client_secret":clientSecret
+            }
+        )
+        self.accessToken = response.json()['access_token']
+        return
 
     # Retrieve list of user's playlists
     def getPlaylists(self):
@@ -34,8 +48,8 @@ class SpotifyMixer:
             headers = {
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "Authorization":"Bearer {}".format(self.spotifyToken)
-            }
+                "Authorization":"Bearer {}".format(self.accessToken)
+            },
         )
 
         responseJson = response.json()
@@ -86,5 +100,6 @@ class SpotifyMixer:
 
 
 mixer = SpotifyMixer()
+mixer.getAccessToken()
 mixer.mapPlaylists()
 mixer.getUserInput()

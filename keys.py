@@ -1,5 +1,0 @@
-spotifyToken = "BQAjMekV3q3EH4dcCQvVoHbms-vo5MEs-WV8lrlnUrZrdoixgtHnTEvxQxsD2ZCb3sibxdYQw3MM_GHC6hNu6qGjmbPbjQ13hFVrVnstgpied_j7YH2CvZgmYEL5fTDgnX6tzLcv5JFvSYXpZnjziJank3nJE-YMIWOMcuBuK9-Gq2ZS"
-userId = "1tncn2eb4gh2cikh24pj7pilj"
-redirectURI = "https://www.spotify.com/us/"
-clientId = "2d5069c5c6fb49bfa2b514ff4256694a"
-responseType = "code"
