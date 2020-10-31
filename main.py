@@ -10,6 +10,7 @@ class SpotifyMixer:
         self.userId = userId
         self.playlists = []
         self.inputList = []
+        self.newPlaylist = None
 
     # Get updated access token
     def getAccessToken(self):
@@ -37,6 +38,7 @@ class SpotifyMixer:
                 "client_secret":clientSecret
             }
         )
+        print(response.json())
         self.accessToken = response.json()['access_token']
         return
 
@@ -95,6 +97,43 @@ class SpotifyMixer:
                 duplicate = True
             else:
                 break
+        
+        # ask for new playlist name
+        # first check that above input is >0
+        if len(self.inputList) == 0:
+            print("You entered 0 playlists, exiting!")
+            return
+        
+        isPlaylist = False
+        while True:
+            if not isPlaylist:
+                self.newPlaylist = input("Enter a new playlist name: ")
+            else:
+                self.newPlaylist = input("This playlist already exists, enter a different playlist name: ")
+            # make sure playlist name doesn't already exist
+            if any(item['name'] == self.newPlaylist for item in self.playlists):
+                isPlaylist = True
+            else:
+                break
+
+    def createPlaylist(self):
+        query = "https://api.spotify.com/v1/users/{}/playlists".format(self.userId)
+        payload = {
+                "name":self.newPlaylist,
+                "public":"false"
+            }
+        response = requests.post(
+            query,
+            headers = {
+                "Authorization":"Bearer {}".format(self.accessToken),
+                "Content-Type":"application/json"
+            },
+            data = json.dumps(payload)
+        )
+
+        print(response.json())
+
+
             
 
 
@@ -103,3 +142,4 @@ mixer = SpotifyMixer()
 mixer.getAccessToken()
 mixer.mapPlaylists()
 mixer.getUserInput()
+mixer.createPlaylist()
