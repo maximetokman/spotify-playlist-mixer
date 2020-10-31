@@ -165,6 +165,7 @@ class SpotifyMixer:
 
     def populatePlaylist(self):
         self.getAllSongs()
+        self.allSongs = list(set(self.allSongs))
         query = "https://api.spotify.com/v1/playlists/{}/tracks".format(
             self.createdPlaylistId
         )
