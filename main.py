@@ -11,6 +11,7 @@ class SpotifyMixer:
         self.playlists = []
         self.inputList = []
         self.newPlaylist = None
+        self.allSongs = []
 
     # Get updated access token
     def getAccessToken(self):
@@ -130,16 +131,35 @@ class SpotifyMixer:
             },
             data = json.dumps(payload)
         )
+   
+    def populatePlaylist(self):
+       # create a list of all songs in the playlists user entered
+        for playlist in self.inputList:
+            playlistIds = [item['id'] for item in self.playlists if item['name'] == playlist]
 
-        print(response.json())
-
-
-            
-
+        offset = 0
+        for playlistId in playlistIds:
+            # get songs while response not empty
+            while True:
+                query = "https://api.spotify.com/v1/playlists/{}/tracks?offset={}".format(playlistId, offset)
+                response = requests.get(
+                    query,
+                    headers = {
+                        "Authorization":"Bearer {}".format(self.accessToken)
+                    }
+                )
+                print(response.json()['items'][0])
+                offset += len(response.json()['items'])
+                print(offset)
+                if not response:
+                    break
+                # self.allSongs.append(response)
+            print(response.json())
 
 
 mixer = SpotifyMixer()
 mixer.getAccessToken()
 mixer.mapPlaylists()
 mixer.getUserInput()
-mixer.createPlaylist()
+# mixer.createPlaylist()
+mixer.populatePlaylist()
