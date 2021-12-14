@@ -166,7 +166,7 @@ def getAllSongs():
             if len(responseJson["items"]) == 0:
                 run = False
 
-# populate new playlist -> 
+# populate new playlist -> update
 @app.route("/update-playlist")
 def populatePlaylist(self):
     self.getAllSongs()
