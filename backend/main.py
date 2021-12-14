@@ -6,7 +6,7 @@ from keys import *
 from flask import Flask, request
 
 app = Flask(__name__)
-# testing
+
 inputList = []
 newPlaylist = None
 allSongs = []
@@ -117,7 +117,7 @@ def mapPlaylists(response):
 #         else:
 #             break
 
-# create playlist
+# create playlist -> /create-playlist?name="playlist_name"
 @app.route("/create-playlist")
 def createPlaylist():
     accessToken = getAccessToken()
@@ -166,7 +166,7 @@ def getAllSongs():
             if len(responseJson["items"]) == 0:
                 run = False
 
-# populate new playlist
+# populate new playlist -> 
 @app.route("/update-playlist")
 def populatePlaylist(self):
     self.getAllSongs()
