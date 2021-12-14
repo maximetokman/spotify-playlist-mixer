@@ -6,7 +6,7 @@ from keys import *
 from flask import Flask, request
 
 app = Flask(__name__)
-# test
+
 inputList = []
 newPlaylist = None
 allSongs = []
