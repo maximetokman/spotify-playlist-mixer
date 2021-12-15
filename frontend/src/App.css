@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+#playlist-input {
+  margin-top: 2em;
+  width: 20%;
+  text-align: center;
+}
+
+#create-button {
+  margin-top: 2em;
+}
+
+#create-button button {
+  background-color: greenyellow;
+  border-radius: 25px;
+  padding: 16px;
+  border: none;
+  cursor: pointer;
+}
