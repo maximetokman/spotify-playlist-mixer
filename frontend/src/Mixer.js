@@ -1,20 +1,48 @@
 import React from 'react'
-import {  } from 'react-dom'
 
 class Mixer extends React.Component {
     constructor(props) {
         super(props);
-        this.backendHost = "http://127.0.0.1:5000/"
+        // this.backendHost = "http://127.0.0.1:5000/"
+        this.backendHost = "https://api.spotifymix.com/";
+        // this.frontendHost = "http://localhost:3000/";
+        this.frontendHost = "https://spotifymix.com/";
         this.state = {
             playlists: [],
             selectedPlaylists: [],
             newPlaylist: "New Playlist",
+
             creating: false,
+            accessToken: null,
         };
     }
 
     componentDidMount = () => {
-        this.generatePlaylists();
+        var url = new URLSearchParams(window.location.href);
+        if (url.has(this.frontendHost + "?code")) {
+            var code = url.get(this.frontendHost + "?code");
+            var queryUrl = this.backendHost + `callback?code=${code}`;
+            fetch(queryUrl, {
+                method: "POST",
+                body: JSON.stringify({
+                    redirect_uri: this.frontendHost,
+                }),
+            })
+                .then(response => response.json())
+                .then(json => {
+                    this.setState({
+                        accessToken: json,
+                    });
+                })
+                .then(() => window.history.pushState({}, '', this.frontendHost))
+                .catch(e => console.log(e));
+        }
+    }
+
+    componentDidUpdate = (prevProps, prevState) => {
+        if (prevState.accessToken !== this.state.accessToken) {
+            this.generatePlaylists();
+        }
     }
 
     updatePlaylistName = (e) => {
@@ -23,12 +51,30 @@ class Mixer extends React.Component {
         });
     }
 
+    authenticateUser = () => {
+        var redirect_uri = this.frontendHost;
+        var scope = "playlist-modify-private playlist-read-private";
+        var client_query = this.backendHost + "client"
+        fetch(client_query)
+            .then(response => response.json())
+            .then(client => {
+                window.location = `https://accounts.spotify.com/authorize?` +
+                    `client_id=${client}` +
+                    `&response_type=code` +
+                    `&redirect_uri=${redirect_uri}` +
+                    `&scope=${encodeURIComponent(scope)}`;
+            })
+            .catch(e => console.log(e));
+    }
+
     createPlaylist = () => {
         this.setState({
             creating: true,
         });
         var queryUrl = this.backendHost + `create-playlist?name=${this.state.newPlaylist}`;
-        var selectionData = {}
+        var selectionData = {
+            "access_token": this.state.accessToken,
+        };
         this.state.selectedPlaylists.forEach((p, i) => {
             selectionData[i] = p;
         });
@@ -49,7 +95,15 @@ class Mixer extends React.Component {
 
     generatePlaylists = () => {
         var queryUrl = this.backendHost + "get-playlists";
-        fetch(queryUrl)
+        fetch(queryUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain",
+            },
+            body: JSON.stringify({
+                "access_token": this.state.accessToken,
+            }),
+        })
             .then(response => response.json())
             .then(json => {
                 var playlists = Object.keys(json).map(id => 
@@ -78,12 +132,12 @@ class Mixer extends React.Component {
     }
 
     render() {
-        console.log(this.state.newPlaylist);
         return (
             <div>
                 <h1>
                     Spotify Playlist Mixer
                 </h1>
+                {this.state.accessToken ?
                 <div>
                     {this.state.playlists}
                     <input
@@ -99,7 +153,15 @@ class Mixer extends React.Component {
                             Create Playlist
                         </button>
                     </div>
+                </div> :
+                <div id="login-button">
+                    <button
+                    onClick={this.authenticateUser}
+                    >
+                        Login
+                    </button>
                 </div>
+                }
             </div>
         )
     }

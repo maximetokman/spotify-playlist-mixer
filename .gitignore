@@ -3,3 +3,6 @@ __pycache__
 node_modules
 build
 .DS_Store
+requirements.txt
+.vscode
+bundle.zip

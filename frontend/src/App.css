@@ -54,3 +54,11 @@
   border: none;
   cursor: pointer;
 }
+
+#login-button button {
+  background-color: lightblue;
+  border-radius: 25px;
+  padding: 16px;
+  border: none;
+  cursor: pointer;
+}
