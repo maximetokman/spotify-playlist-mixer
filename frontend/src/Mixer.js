@@ -172,6 +172,7 @@ class Mixer extends React.Component {
                 </h1>
                 {this.state.accessToken ?
                 <Form id='content-wrap'>
+                    <h2>Your playlists:</h2>
                     {this.state.playlists}
                     <Form.Group id="playlist-input">
                         <Form.Control
