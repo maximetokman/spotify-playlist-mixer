@@ -11,8 +11,8 @@ class Mixer extends React.Component {
         super(props);
         // this.backendHost = "http://127.0.0.1:5000/"
         this.backendHost = "https://api.spotifymix.com/";
-        this.frontendHost = "http://localhost:3000/";
-        // this.frontendHost = "https://spotifymix.com/";
+        // this.frontendHost = "http://localhost:3000/";
+        this.frontendHost = "https://spotifymix.com/";
         this.state = {
             playlists: [],
             selectedPlaylists: [],
