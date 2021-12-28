@@ -1,19 +1,27 @@
-import React from 'react'
+import React from 'react';
+import { 
+    Button,
+    Modal,
+    Spinner,
+    Form,
+} from 'react-bootstrap';
 
 class Mixer extends React.Component {
     constructor(props) {
         super(props);
         // this.backendHost = "http://127.0.0.1:5000/"
         this.backendHost = "https://api.spotifymix.com/";
-        // this.frontendHost = "http://localhost:3000/";
-        this.frontendHost = "https://spotifymix.com/";
+        this.frontendHost = "http://localhost:3000/";
+        // this.frontendHost = "https://spotifymix.com/";
         this.state = {
             playlists: [],
             selectedPlaylists: [],
-            newPlaylist: "New Playlist",
-
+            newPlaylist: null,
             creating: false,
             accessToken: null,
+            showModal: false,
+            nameValid: true,
+            selectionValid: true,
         };
     }
 
@@ -48,6 +56,7 @@ class Mixer extends React.Component {
     updatePlaylistName = (e) => {
         this.setState({
             newPlaylist: e.target.value,
+            nameValid: e.target.value.length > 0,
         });
     }
 
@@ -68,33 +77,47 @@ class Mixer extends React.Component {
     }
 
     createPlaylist = () => {
-        this.setState({
-            creating: true,
-        });
-        var queryUrl = this.backendHost + `create-playlist?name=${this.state.newPlaylist}`;
-        var selectionData = {
-            "access_token": this.state.accessToken,
-        };
-        this.state.selectedPlaylists.forEach((p, i) => {
-            selectionData[i] = p;
-        });
-        fetch(queryUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain",
-            },
-            body: JSON.stringify(selectionData),
-        })
-            .then(() => {
-                this.setState({
-                    creating: false,
-                });
+        if (!this.state.newPlaylist?.length > 0 || !(this.state.selectedPlaylists?.length >= 2)) {
+            this.setState({
+                nameValid: this.state.newPlaylist?.length > 0,
+                selectionValid: this.state.selectedPlaylists?.length >= 2,
+            });
+        }
+        else {
+            this.setState({
+                creating: true,
+            });
+            var queryUrl = this.backendHost + `create-playlist?name=${this.state.newPlaylist}`;
+            var selectionData = {
+                "access_token": this.state.accessToken,
+            };
+            this.state.selectedPlaylists.forEach((p, i) => {
+                selectionData[i] = p;
+            });
+            fetch(queryUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+                body: JSON.stringify(selectionData),
             })
-            .catch(e => console.log(e));
+                .then(() => {
+                    this.setState({
+                        creating: false,
+                    });
+                })
+                .catch(e => console.log(e));
+        }
     }
 
     generatePlaylists = () => {
         var queryUrl = this.backendHost + "get-playlists";
+        var loadingPlaylists = (
+            <Spinner animation='grow'/>
+        )
+        this.setState({
+            playlists: loadingPlaylists,
+        });
         fetch(queryUrl, {
             method: "POST",
             headers: {
@@ -106,10 +129,12 @@ class Mixer extends React.Component {
         })
             .then(response => response.json())
             .then(json => {
+                console.log(json);
                 var playlists = Object.keys(json).map(id => 
                     <div>
-                        <input
-                        type="checkbox"
+                        <Form.Check
+                        type='checkbox'
+                        inline
                         id={id}
                         onClick={() => {
                             var updatedSelection = this.state.selectedPlaylists;
@@ -118,10 +143,11 @@ class Mixer extends React.Component {
                                 updatedSelection.concat(id)
                             this.setState({
                                 selectedPlaylists: updatedSelection,
+                                selectionValid: updatedSelection.length >= 2,
                             });
                         }}
+                        label={json[id]}
                         />
-                        <label for={id}>{json[id]}</label>
                     </div>
                 );
                 this.setState({
@@ -131,6 +157,13 @@ class Mixer extends React.Component {
             .catch(e => console.log(e));
     }
 
+    toggleModal = (action=null) => {
+        const { showModal } = this.state;
+        this.setState({
+            showModal: action == null ? !showModal : action,
+        });
+    }
+
     render() {
         return (
             <div>
@@ -138,30 +171,66 @@ class Mixer extends React.Component {
                     Spotify Playlist Mixer
                 </h1>
                 {this.state.accessToken ?
-                <div>
+                <Form>
                     {this.state.playlists}
-                    <input
-                    id="playlist-input" 
-                    type="text" 
-                    placeholder='Enter a new playlist name'
-                    onChange={this.updatePlaylistName}
-                    />
-                    <div id='create-button'>
-                        <button 
-                        disabled={this.state.creating} 
-                        onClick={this.createPlaylist}>
-                            Create Playlist
-                        </button>
-                    </div>
-                </div> :
-                <div id="login-button">
-                    <button
-                    onClick={this.authenticateUser}
+                    <Form.Group id="playlist-input">
+                        <Form.Control
+                        placeholder='Enter a new playlist name'
+                        onChange={this.updatePlaylistName}
+                        isInvalid={!this.state.nameValid || !this.state.selectionValid}
+                        />
+                        <Form.Control.Feedback
+                        type='invalid'
+                        >
+                            {!this.state.nameValid && <p>Please enter a new playlist name.</p>}
+                            {!this.state.selectionValid && <p>Please select at least 2 playlists.</p>}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                    <Button
+                    variant='dark'
+                    disabled={this.state.creating}
+                    onClick={this.createPlaylist}
                     >
-                        Login
-                    </button>
+                        {this.state.creating ? 
+                        <Spinner animation='border' size='sm'/> :
+                        'Create Playlist'
+                        }
+                    </Button>
+                </Form> :
+                <div>
+                    <div id="login-button">
+                        <Button
+                        variant='dark'
+                        onClick={this.authenticateUser}
+                        >
+                            Login with your Spotify credentials
+                        </Button>
+                    </div>
+                    <div id="about-button">
+                        <Button variant="outline-dark" onClick={this.toggleModal}>
+                            Instructions
+                        </Button>
+                        <Modal show={this.state.showModal} onHide={() => this.toggleModal(false)}>
+                            <Modal.Header closeButton>
+                                <Modal.Title>Instructions</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                                Log in with your Spotify credentials. Then, pick at least 2 playlists to
+                                mix together. Enter a name for your new playlist and wait a few seconds
+                                for your new playlist to be visible in your Spotify account.
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="secondary" onClick={() => this.toggleModal(false)}>
+                                    Close
+                                </Button>
+                            </Modal.Footer>
+                        </Modal>
+                    </div>
                 </div>
                 }
+                <div id='footer'>
+                    Created by Max Tokman, 2021
+                </div>
             </div>
         )
     }
