@@ -11,8 +11,8 @@ class Mixer extends React.Component {
         super(props);
         // this.backendHost = "http://127.0.0.1:5000/"
         this.backendHost = "https://api.spotifymix.com/";
-        // this.frontendHost = "http://localhost:3000/";
-        this.frontendHost = "https://spotifymix.com/";
+        this.frontendHost = "http://localhost:3000/";
+        // this.frontendHost = "https://spotifymix.com/";
         this.state = {
             playlists: [],
             selectedPlaylists: [],
@@ -166,12 +166,12 @@ class Mixer extends React.Component {
 
     render() {
         return (
-            <div>
+            <div id='container'>
                 <h1>
                     Spotify Playlist Mixer
                 </h1>
                 {this.state.accessToken ?
-                <Form>
+                <Form id='content-wrap'>
                     {this.state.playlists}
                     <Form.Group id="playlist-input">
                         <Form.Control
@@ -197,7 +197,7 @@ class Mixer extends React.Component {
                         }
                     </Button>
                 </Form> :
-                <div>
+                <div id='content-wrap'>
                     <div id="login-button">
                         <Button
                         variant='dark'
@@ -229,7 +229,7 @@ class Mixer extends React.Component {
                 </div>
                 }
                 <div id='footer'>
-                    Created by Max Tokman, 2021
+                    <p>Created by Max Tokman, 2021</p>
                 </div>
             </div>
         )
