@@ -8,6 +8,7 @@ from flask_cors import CORS
 application = Flask(__name__)
 CORS(application)
 
+
 # Get client id
 @application.route("/client")
 def getClientId():
